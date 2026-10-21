@@ -4,6 +4,41 @@ Design record for how profiles are described. Written 2026-10-20, **derived from
 failure** rather than from preference — see `stream-controller-profile.md` for the audit that
 produced it.
 
+## Vocabulary
+
+Defined because the rest of this document leans on it, and because the distinction between
+the last two rows **is** the bug.
+
+| Term | Example | Meaning |
+|---|---|---|
+| key | `Right` | one physical key |
+| modifier | `Ctrl`, `Alt`, `Shift`, `Super` | a key that changes another key's meaning *while held* |
+| **chord** | `Ctrl+Alt+Right` | modifiers + one key, pressed **together**. One action. Borrowed from music — notes struck together, not in sequence. |
+| **key event** | `ctrl↓` | a single down *or* up. What `uinput` and the kernel actually consume. |
+| macro | `Ctrl+C`, wait, `Ctrl+V` | an ordered list of chords |
+
+One chord is several key events. `Ctrl+Alt+Right` is **one** chord and **six** events:
+
+```
+ctrl↓  alt↓  right↓  right↑  alt↑  ctrl↑
+```
+
+Humans think in chords. The kernel needs events. **Every bug below lives in that translation**,
+and it exists only because LoupixDeck makes a person perform it by hand.
+
+## Not ours: `~/.config/LoupixDeck/macros.json`
+
+That file belongs to LoupixDeck. This app's profiles live in `profiles/` in this repo, in the
+format below. LoupixDeck's config is relevant twice, **read-only both times**:
+
+1. **As a test fixture** — it contains three known, documented bugs, so it is the answer key
+   for the validator. A validator that cannot find them does not work.
+2. **As a one-time import** (milestone 6) — so a working setup does not have to be re-entered
+   by hand.
+
+Never written to. While LoupixDeck is installed it rewrites that file on exit, so anything we
+changed would be silently clobbered.
+
 ## The failure this design exists to prevent
 
 LoupixDeck models a macro as an **imperative list of key events**. Binding `Ctrl+Space` means
