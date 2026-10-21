@@ -1,0 +1,47 @@
+# Frieren Grimoire — device access without root.
+#
+# NOT INSTALLED YET. To install:
+#   sudo cp udev/99-frieren-grimoire.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# To remove:
+#   sudo rm /etc/udev/rules.d/99-frieren-grimoire.rules && sudo udevadm control --reload-rules
+#
+# Why this file is needed even though OpenRazer works: OpenRazer never grants access to
+# /dev/hidraw*. Its own 99-razer.rules only touches usb/input/hid nodes and the sysfs
+# attribute directory (verified by grepping the openrazer repo — zero hidraw references).
+# That is why the Razer hidraw nodes are root-only on this machine today.
+#
+# TAG+="uaccess" asks systemd-logind to grant an ACL to whoever is logged in at the seat.
+# GROUP/MODE are a fallback for the case where uaccess does not apply; the user is already
+# in plugdev, so either path works.
+
+# --- Razer DeathAdder V2 Pro (wireless) — DPI, polling rate, battery -----------------
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="007d", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# --- Razer Mouse Dock Chroma — dock lighting ----------------------------------------
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="007e", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# --- Razer Stream Controller — CDC-ACM serial ---------------------------------------
+# Currently already granted by /etc/udev/rules.d/99-loupixdeck.rules (MODE="0666").
+# Duplicated here deliberately so the deck keeps working if LoupixDeck is ever removed.
+# Note 0666 there vs 0660+uaccess here — ours is the tighter of the two.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0d06", MODE="0660", GROUP="dialout", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0d06", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# --- uinput — virtual keyboard/mouse for macros (milestone 7) -----------------------
+# Also already granted by the LoupixDeck rule; duplicated for the same reason.
+KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+
+# ====================================================================================
+# BELOW: only needed if we talk to these devices directly instead of via OpenRGB.
+# Commented out until that decision is made — an unused grant is still an open door.
+# ====================================================================================
+
+# --- Logitech Lightspeed receiver (G915) — HID++ 2.0 --------------------------------
+#SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c545", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# --- Logitech G560 speakers ---------------------------------------------------------
+#SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0a78", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# --- ASUS Aura LED controller (USB HID, NOT SMBus) ----------------------------------
+#SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="1939", MODE="0660", GROUP="plugdev", TAG+="uaccess"
