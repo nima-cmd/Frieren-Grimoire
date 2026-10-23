@@ -13,7 +13,7 @@ named source file.
 
 ## Machine
 
-[V] Inventory taken 2026-10-20.
+[V] Inventory taken 2026-10-22.
 
 | | |
 |---|---|
@@ -276,7 +276,7 @@ they coexist if OpenRazer's effects/persistence are left off.
 
 [V] G560 (`046d:0a78`) supported, plain USB.
 
-[V] **The keyboard is a G915 TKL** — confirmed 2026-10-20 by physical inspection (no numpad).
+[V] **The keyboard is a G915 TKL** — confirmed 2026-10-22 by physical inspection (no numpad).
 This matches the community kernel-patch mapping of receiver PID `c545` to the TKL, and
 resolves the discrepancy with merge !713 (which covers the *full-size* G915). TKL support
 landed separately in !929 / !1029, with documented limits: **only "Direct" LED mode works,
@@ -319,7 +319,7 @@ BlackWidow's fn on the Mac side.
 
 ## Open questions
 
-1. ~~G915 vs G915 TKL~~ — **resolved 2026-10-20: TKL.** See above.
+1. ~~G915 vs G915 TKL~~ — **resolved 2026-10-22: TKL.** See above.
 2. **Does anything on the TKL actually emit F13-F24?** Decides whether milestone 7 route 1
    is real. Test by grabbing `/dev/input/event5` and pressing every key and FN combination.
 3. **Stream Controller firmware version** — read with `VERSION` (`0x07`); decides whether the

@@ -158,10 +158,10 @@ HID_NAME=RAZER Razer Mouse Dock</code></pre>
           The DeathAdder V2 Pro is <code>1532:007d</code>. [V]</p>
 
         <div class="gotcha">
-          <b>Gotcha — node numbers are not stable.</b> Measured on this machine, nothing
-          unplugged, three hours apart:
-          <pre><code>18:35  DeathAdder → hidraw12,13,14,17,19   Dock → hidraw15,16,18
-21:35  Dock       → hidraw12,13,14         DeathAdder → hidraw15,16,17,18,19</code></pre>
+          <b>Gotcha — node numbers are not stable.</b> Observed twice in one session on this
+          machine, nothing unplugged in between:
+          <pre><code>first read   DeathAdder → hidraw12,13,14,17,19   Dock → hidraw15,16,18
+later read   Dock       → hidraw12,13,14         DeathAdder → hidraw15,16,17,18,19</code></pre>
           The wireless mouse slept and re-enumerated, and the two swapped ranges. Code holding
           <code>hidraw12</code> would now be sending mouse commands to the dock.
           <b>Always discover by vid/pid; never remember a path.</b>
@@ -350,7 +350,35 @@ Start Pause         ctrl↓  space↓  space↑         ctrl never released</cod
           being validated, OpenRazer's sysfs is free ground truth. Removing it early throws
           away the answer key.</p>
 
-        <h3>3. The mitigation that does not work here</h3>
+        <h3>3. Trusting <code>date</code> without asking whether <em>it</em> was right</h3>
+        <p><b>Claimed:</b> the session began 6:33pm Tue 20 Oct and ran "about three hours",
+          with the hidraw renumbering timed at 18:35 and 21:35.<br>
+          <b>Actually:</b> the system clock was wrong by roughly two days. It read
+          <code>Tue Oct 20</code> all evening and then jumped to
+          <code>Thu Oct 22 17:23 PDT</code> when NTP corrected it
+          (<code>timedatectl</code>: <em>System clock synchronized: yes</em>). Every date
+          written into this repo was wrong, and every elapsed-time claim was a difference
+          between two readings of a drifting clock.</p>
+        <div class="gotcha">
+          <b>The lesson, and it generalises past clocks.</b> The standing rule was
+          <em>never guess the clock — run <code>date</code></em>, and that rule was followed
+          every single time. It still produced two days of wrong dates, because running the
+          command only replaces <em>your</em> guess with <em>the machine's</em> claim. A
+          measurement is not the same as a verified measurement.
+          <br><br>
+          What would have caught it instantly: the session context said
+          <em>"Today's date is 2026-10-22"</em> from the very first message, and
+          <code>date</code> said the 20th. <b>Two sources disagreed and the conflict went
+          unnoticed for the whole session.</b> Cross-check the instrument against a second
+          source before building numbers on it.
+          <br><br>
+          Note what survived: the hidraw renumbering is a <em>direct observation</em> —
+          <code>hidraw12</code> named one device, then named another — and needs no clock at
+          all. Observations outlive the instruments that timestamp them, which is a good
+          reason to record what you saw separately from when you saw it.
+        </div>
+
+        <h3>4. The mitigation that does not work here</h3>
         <p>Standard advice for OpenRGB is "don't load <code>i2c-dev</code>/<code>i2c-piix4</code>."
           [V] On this machine <code>i2c-dev</code> is <b>compiled into the kernel</b> and
           <code>i2c_piix4</code> is already loaded, with three live SMBus adapters. Withholding
@@ -363,10 +391,10 @@ Start Pause         ctrl↓  space↓  space↑         ctrl never released</cod
 <script>
 const MILESTONES = [
   { id:"m1", track:"FOUNDATION", title:"Inventory & protocol notes", state:"done",
-    started:"2026-10-20", finished:"2026-10-20",
+    started:"2026-10-22", finished:"2026-10-22",
     note:"Six devices confirmed reachable. Transaction ID corrected 0x1F→0x3f. udev rule written. Deck audited." },
   { id:"m2", track:"FOUNDATION", title:"Skeleton app & service", state:"current",
-    started:"2026-10-20", finished:null,
+    started:"2026-10-22", finished:null,
     note:"Discovery by vid/pid, not node path. find_hidraw is the open exercise." },
   { id:"m3", track:"DEVICES", title:"Lighting for all devices", state:"locked", note:"Needs the OpenRGB decision." },
   { id:"m4", track:"DEVICES", title:"DeathAdder DPI, polling, battery", state:"locked",
@@ -380,7 +408,7 @@ const MILESTONES = [
   { id:"m9", track:"POLISH", title:"Frieren theme", state:"locked", note:"Art from assets/ only." },
 ];
 
-const NOW = `<b>Milestone 2 — the skeleton.</b> Milestone 1 closed 2026-10-20: every device
+const NOW = `<b>Milestone 2 — the skeleton.</b> Milestone 1 closed 2026-10-22: every device
 confirmed reachable, protocol notes written, and the existing Stream Controller config audited
 (one knob of three and four touch buttons of six are dead in Krita, plus a macro that leaks a
 held Ctrl system-wide). Open exercise: <code>find_hidraw()</code> in

@@ -41,7 +41,7 @@ root `NOTES.md` for the verification.
 ### `razer_test.py` — the seed of the Linux Razer module
 
 Its `build_report()` was checked byte-for-byte against OpenRazer's `driver/razercommon.{c,h}`
-on 2026-10-20 and is **correct**: the struct layout matches, and the CRC (XOR over bytes
+on 2026-10-22 and is **correct**: the struct layout matches, and the CRC (XOR over bytes
 2..87 inclusive, stored at byte 88) matches `razer_crc()` exactly.
 
 To reuse it, three things change — and nothing else:

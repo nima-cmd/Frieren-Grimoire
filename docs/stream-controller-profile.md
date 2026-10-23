@@ -1,7 +1,7 @@
 # Stream Controller — the Krita animation page
 
 Audit of the **existing** LoupixDeck configuration against **Krita's actual bindings**,
-2026-10-20. This is the design record for the deck page; the Frieren Grimoire app will
+2026-10-22. This is the design record for the deck page; the Frieren Grimoire app will
 eventually load this same layout, but it is useful *today* through LoupixDeck's GUI.
 
 Sources checked, all first-party:

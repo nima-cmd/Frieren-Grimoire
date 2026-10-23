@@ -1,14 +1,20 @@
 """Device discovery.
 
 Devices are found by matching USB vendor/product ID, never by remembering a
-node path. Proof that this matters, measured on this machine 2026-10-20:
+node path. Proof that this matters, observed twice on this machine during a
+single session on 2026-10-22, nothing unplugged in between:
 
-    18:35   DeathAdder -> hidraw12,13,14,17,19   Dock -> hidraw15,16,18
-    21:35   Dock       -> hidraw12,13,14         DeathAdder -> hidraw15,16,17,18,19
+    first read    DeathAdder -> hidraw12,13,14,17,19   Dock -> hidraw15,16,18
+    later read    Dock       -> hidraw12,13,14         DeathAdder -> hidraw15,16,17,18,19
 
-The wireless mouse slept and re-enumerated, and the two swapped ranges three
-hours apart with nothing unplugged. Code holding "hidraw12" would now be
-talking to the dock while believing it had the mouse.
+The wireless mouse slept and re-enumerated, and the two swapped ranges. Code
+holding "hidraw12" would now be talking to the dock while believing it had
+the mouse.
+
+(The two reads were originally recorded with wall-clock times. They are gone
+because the system clock was wrong by two days that session and later jumped
+when NTP corrected it, so any interval derived from it is untrustworthy. The
+renumbering itself is a direct observation and stands.)
 """
 
 from dataclasses import dataclass

@@ -1,6 +1,6 @@
 # The config model
 
-Design record for how profiles are described. Written 2026-10-20, **derived from a specific
+Design record for how profiles are described. Written 2026-10-22, **derived from a specific
 failure** rather than from preference — see `stream-controller-profile.md` for the audit that
 produced it.
 

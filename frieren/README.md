@@ -42,11 +42,11 @@ Your function returns a list like `["/dev/hidraw15", "/dev/hidraw16", ...]`.
 
 ## Why match on IDs instead of just remembering the path
 
-Measured on your machine today, nothing unplugged, three hours apart:
+Observed twice on your machine in one session, nothing unplugged in between:
 
 ```
-18:35   DeathAdder → hidraw12,13,14,17,19     Dock → hidraw15,16,18
-21:35   Dock       → hidraw12,13,14           DeathAdder → hidraw15,16,17,18,19
+first read   DeathAdder → hidraw12,13,14,17,19     Dock → hidraw15,16,18
+later read   Dock       → hidraw12,13,14           DeathAdder → hidraw15,16,17,18,19
 ```
 
 The wireless mouse slept, re-enumerated, and the two swapped ranges. Code holding `hidraw12`
