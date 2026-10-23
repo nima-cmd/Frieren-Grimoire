@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frieren Grimoire — Ledger</title>
+<style>
+:root{
+  --bg:#f4efe3; --panel:#fbf7ee; --ink:#2f2a24; --ink-soft:#6b6052;
+  --line:#ddd2bd; --accent:#4a6c8c; --done:#5f7d5a; --current:#9a6b2f; --locked:#9d968a;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#1b1917; --panel:#242120; --ink:#ece4d6; --ink-soft:#a99e8c;
+         --line:#3a3531; --accent:#8fb4d4;
+         --done:#8db287; --current:#d2a25c; --locked:#6e665c; }
+}
+*{box-sizing:border-box}
+body{margin:0;padding:2rem 1rem 4rem;background:var(--bg);color:var(--ink);
+  font:16px/1.6 Georgia,"Palatino Linotype","Book Antiqua",serif}
+.page{max-width:50rem;margin:0 auto}
+h1{font-size:1.9rem;margin:0 0 .15rem}
+.sub{color:var(--ink-soft);margin:0 0 1.5rem;font-size:.95rem}
+.tabbar{display:flex;gap:8px;margin-bottom:1.75rem;position:sticky;top:0;
+  background:var(--bg);padding:.6rem 0;z-index:5}
+.tabbtn{padding:8px 18px;border:1px solid var(--line);background:var(--panel);
+  color:var(--ink);border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem}
+.tabbtn.active{background:var(--accent);color:#fff;border-color:transparent}
+.tabpanel{display:none}
+.tabpanel.active{display:block}
+
+/* ---- progress ---- */
+.now{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--current);
+  border-radius:8px;padding:1rem 1.15rem;margin-bottom:1.75rem}
+.now h2{margin:0 0 .4rem;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink-soft)}
+.track{margin:1.75rem 0 .6rem;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:.3rem}
+.ms{display:flex;gap:.8rem;padding:.6rem .2rem;border-bottom:1px solid var(--line)}
+.dot{flex:0 0 auto;width:.8rem;height:.8rem;border-radius:50%;margin-top:.45rem;
+  background:var(--locked)}
+.ms[data-state=done] .dot{background:var(--done)}
+.ms[data-state=current] .dot{background:var(--current);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--current) 25%,transparent)}
+.ms .t{font-weight:600}
+.ms[data-state=locked] .t{color:var(--ink-soft);font-weight:400}
+.ms .n{display:block;font-size:.88rem;color:var(--ink-soft);margin-top:.15rem}
+
+/* ---- grimoire ---- */
+#tab-grimoire{
+  --parch:#e9dbb8; --parch2:#f1e6c8; --edge:#8a6d43;
+  --ink2:#3b2b20; --ink2-soft:#5c4632; --accent2:#7a3b2e; --gold:#93712f;
+}
+.book{background:linear-gradient(170deg,var(--parch2),var(--parch));
+  color:var(--ink2);border:1px solid var(--edge);border-radius:4px;
+  padding:2.5rem 2rem;box-shadow:0 2px 18px rgba(0,0,0,.18)}
+.gtitle{text-align:center;font-size:2rem;margin:0;letter-spacing:.06em}
+.gsub{text-align:center;color:var(--ink2-soft);font-style:italic;margin:.3rem 0 2rem;
+  font-size:.95rem}
+.toc{list-style:none;padding:0;margin:0 0 2.5rem;border-top:1px solid var(--edge);
+  border-bottom:1px solid var(--edge);padding:1rem 0}
+.toc li{margin:.3rem 0}
+.toc a{color:var(--ink2);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.chnum{display:inline-block;min-width:7.5rem;color:var(--gold);font-variant:small-caps;
+  letter-spacing:.06em;font-size:.9rem}
+.chapter{margin:2.25rem 0}
+.chapter h2{margin:.2rem 0 1rem;font-size:1.4rem;color:var(--accent2)}
+.chapter h3{margin:1.5rem 0 .4rem;font-size:1.08rem}
+.chapter p,.chapter li{color:var(--ink2)}
+.chapter code{background:rgba(0,0,0,.07);padding:.1em .35em;border-radius:3px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+.chapter pre{background:rgba(0,0,0,.07);padding:.8rem 1rem;border-radius:4px;overflow-x:auto}
+.chapter pre code{background:none;padding:0}
+.term{font-variant:small-caps;letter-spacing:.04em;font-weight:700;color:var(--accent2)}
+.gotcha{border-left:3px solid var(--accent2);background:rgba(122,59,46,.08);
+  padding:.7rem 1rem;margin:1rem 0;border-radius:0 4px 4px 0}
+.asked{border-left:3px solid var(--gold);background:rgba(147,113,47,.1);
+  padding:.7rem 1rem;margin:1rem 0;border-radius:0 4px 4px 0}
+.divider{text-align:center;color:var(--gold);margin:2.5rem 0;letter-spacing:.6em}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.92rem}
+th,td{text-align:left;padding:.4rem .6rem;border-bottom:1px solid var(--edge)}
+th{font-variant:small-caps;letter-spacing:.05em}
+.wrap{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Frieren Grimoire</h1>
+  <p class="sub">One app for every device on this machine. Pop!_OS · COSMIC · Python.</p>
+
+  <nav class="tabbar">
+    <button class="tabbtn active" data-tab="progress">📊 Progress</button>
+    <button class="tabbtn" data-tab="grimoire">📜 Grimoire</button>
+  </nav>
+
+  <main id="tab-progress" class="tabpanel active">
+    <div class="now">
+      <h2>Now</h2>
+      <div id="now-text"></div>
+    </div>
+    <div id="milestones"></div>
+  </main>
+
+  <main id="tab-grimoire" class="tabpanel">
+    <div class="book">
+      <h1 class="gtitle">The Grimoire</h1>
+      <p class="gsub">Every term, protocol and mistake recorded here — organised by subject,<br>
+        because a record ordered by topic can be re-read and a transcript cannot.</p>
+
+      <ul class="toc">
+        <li><a href="#ch0"><span class="chnum">Front matter</span> How to read this</a></li>
+        <li><a href="#ch1"><span class="chnum">Chapter I</span> Speaking to devices</a></li>
+        <li><a href="#ch2"><span class="chnum">Chapter II</span> The Razer Chroma protocol</a></li>
+        <li><a href="#ch3"><span class="chnum">Chapter III</span> Keys, chords and events</a></li>
+        <li><a href="#ch4"><span class="chnum">Chapter IV</span> Configuration that cannot be wrong</a></li>
+        <li><a href="#ch5"><span class="chnum">Errata</span> Mistakes, kept on purpose</a></li>
+      </ul>
+
+      <div class="chapter" id="ch0">
+        <span class="chnum">Front matter</span>
+        <h2>How to read this</h2>
+        <p>Claims about hardware carry their epistemic status, the same convention as
+          <code>NOTES.md</code>:</p>
+        <ul>
+          <li><b>[V]</b> — verified on this machine, or read out of named source code.</li>
+          <li><b>[R]</b> — reported by a secondary source; reliability noted.</li>
+          <li><b>[?]</b> — assumed, inferred or predicted. <b>Not</b> verified. Do not build on it.</li>
+        </ul>
+        <p>The distinction matters because a clean derivation from a half-remembered fact is
+          exactly as convincing as a correct one. Chapter V exists because that happened twice
+          on the first night.</p>
+      </div>
+
+      <div class="divider">❦ ❦ ❦</div>
+
+      <div class="chapter" id="ch1">
+        <span class="chnum">Chapter I</span>
+        <h2>Speaking to devices</h2>
+
+        <h3><span class="term">hidraw</span></h3>
+        <p>A raw channel to a USB HID device, at <code>/dev/hidrawN</code>. "Raw" means the
+          kernel hands bytes straight through instead of interpreting them as mouse movement
+          or keypresses. It is how you say things a mouse driver has no vocabulary for —
+          <em>change your DPI</em>, <em>what is your battery level</em>.</p>
+
+        <h3><span class="term">sysfs</span> and <span class="term">uevent</span></h3>
+        <p><code>/sys</code> is a fake filesystem the kernel generates to describe its own
+          state. Nothing there is on disk. Every hidraw node has a matching directory, and
+          inside it <code>device/uevent</code> names the hardware:</p>
+        <pre><code>HID_ID=0003:00001532:0000007E
+HID_NAME=RAZER Razer Mouse Dock</code></pre>
+        <p><code>HID_ID</code> is <code>bus : vendor : product</code> in hex. Matching on it is
+          how discovery works.</p>
+
+        <h3><span class="term">vid / pid</span></h3>
+        <p>Vendor ID and product ID — the two numbers that identify a USB device model.
+          Razer is <code>1532</code>, Logitech <code>046d</code>, ASUS <code>0b05</code>.
+          The DeathAdder V2 Pro is <code>1532:007d</code>. [V]</p>
+
+        <div class="gotcha">
+          <b>Gotcha — node numbers are not stable.</b> Measured on this machine, nothing
+          unplugged, three hours apart:
+          <pre><code>18:35  DeathAdder → hidraw12,13,14,17,19   Dock → hidraw15,16,18
+21:35  Dock       → hidraw12,13,14         DeathAdder → hidraw15,16,17,18,19</code></pre>
+          The wireless mouse slept and re-enumerated, and the two swapped ranges. Code holding
+          <code>hidraw12</code> would now be sending mouse commands to the dock.
+          <b>Always discover by vid/pid; never remember a path.</b>
+        </div>
+
+        <h3><span class="term">udev</span> and <span class="term">uaccess</span></h3>
+        <p>udev reacts to devices appearing and can set permissions on their nodes. By default
+          <code>/dev/hidraw*</code> is root-only, which is why a rule is needed.
+          <code>TAG+="uaccess"</code> asks systemd-logind to grant an ACL to whoever is logged
+          in at the seat — more modern than adding yourself to a group, and it follows the
+          session.</p>
+
+        <div class="gotcha">
+          <b>Gotcha — OpenRazer never touches hidraw permissions.</b> [V] Its
+          <code>99-razer.rules</code> only covers <code>usb</code>/<code>input</code>/<code>hid</code>
+          nodes and the sysfs attribute directory; a grep of the whole repo finds zero
+          references to hidraw. It works through sysfs files the kernel driver creates. That is
+          why the Razer hidraw nodes are still root-only here even though the daemon is fine.
+        </div>
+
+        <h3><span class="term">evdev</span> and <span class="term">uinput</span></h3>
+        <p>Two halves of the same door. <b>evdev</b> reads input events and can tell you
+          <em>which device</em> a key came from. <b>uinput</b> creates a virtual keyboard or
+          mouse and injects events. Both work under Wayland, because they sit in the kernel
+          below the display server — which is why `xdotool` fails on COSMIC and uinput does not.</p>
+
+        <h3><span class="term">DKMS</span></h3>
+        <p>Dynamic Kernel Module Support — rebuilds an out-of-tree kernel module automatically
+          whenever the kernel updates. OpenRazer ships its driver this way.</p>
+      </div>
+
+      <div class="divider">❦ ❦ ❦</div>
+
+      <div class="chapter" id="ch2">
+        <span class="chnum">Chapter II</span>
+        <h2>The Razer Chroma protocol</h2>
+
+        <h3><span class="term">feature report</span></h3>
+        <p>USB HID carries three kinds of traffic. Input reports flow device→host (you moved
+          the mouse). Output reports flow host→device. A <b>feature report</b> is a two-way
+          control channel for configuration — you set it, and you can read it back. Razer's
+          whole protocol rides on feature report ID <code>0x00</code>.</p>
+
+        <h3>The 90-byte report</h3>
+        <p>[V] From <code>razercommon.h</code>, with a <code>static_assert</code> that the
+          struct is exactly 90 bytes:</p>
+        <div class="wrap"><table>
+          <tr><th>Offset</th><th>Field</th></tr>
+          <tr><td>0</td><td>status</td></tr>
+          <tr><td>1</td><td>transaction_id</td></tr>
+          <tr><td>2–3</td><td>remaining_packets (<b>big-endian</b>)</td></tr>
+          <tr><td>4</td><td>protocol_type</td></tr>
+          <tr><td>5</td><td>data_size</td></tr>
+          <tr><td>6</td><td>command_class</td></tr>
+          <tr><td>7</td><td>command_id</td></tr>
+          <tr><td>8–87</td><td>arguments[80]</td></tr>
+          <tr><td>88</td><td>crc</td></tr>
+          <tr><td>89</td><td>reserved</td></tr>
+        </table></div>
+
+        <h3><span class="term">transaction ID</span></h3>
+        <p>A per-device-model tag that must be correct or the device silently ignores you. It
+          is not a sequence number and does not increment. [V] The DeathAdder V2 Pro
+          (<code>007d</code>) uses <code>0x3f</code>.</p>
+
+        <h3><span class="term">CRC</span></h3>
+        <p>A checksum proving the frame arrived intact. Razer's is deliberately simple —
+          [V] <code>razercommon.c:111-119</code> XORs bytes 2 through 87 inclusive and stores
+          the result at byte 88.</p>
+        <p>Why XOR? It is one instruction per byte and catches any single-byte corruption. It
+          would miss two errors that cancel out, which over a 10 cm USB cable is an acceptable
+          trade.</p>
+
+        <div class="asked">
+          <b>Worth knowing:</b> <code>charge_level</code> reads <code>245</code>. That is not
+          245% — the value is raw 0–255, so it is ≈96%. [V] confirmed in
+          <code>razerchromacommon.c:1057-1060</code>, where the driver hands back
+          <code>arguments[1]</code> for the caller to scale.
+        </div>
+      </div>
+
+      <div class="divider">❦ ❦ ❦</div>
+
+      <div class="chapter" id="ch3">
+        <span class="chnum">Chapter III</span>
+        <h2>Keys, chords and events</h2>
+        <p>The vocabulary here is small, and the gap between the last two rows is where a real
+          bug lived for months.</p>
+
+        <div class="wrap"><table>
+          <tr><th>Term</th><th>Example</th><th>Meaning</th></tr>
+          <tr><td>key</td><td><code>Right</code></td><td>one physical key</td></tr>
+          <tr><td>modifier</td><td><code>Ctrl</code>, <code>Alt</code></td>
+              <td>changes another key's meaning <em>while held</em></td></tr>
+          <tr><td><b>chord</b></td><td><code>Ctrl+Alt+Right</code></td>
+              <td>modifiers + one key, pressed <b>together</b>. One action.</td></tr>
+          <tr><td><b>key event</b></td><td><code>ctrl↓</code></td>
+              <td>a single down <em>or</em> up. What the kernel consumes.</td></tr>
+          <tr><td>macro</td><td><code>Ctrl+C</code>, wait, <code>Ctrl+V</code></td>
+              <td>an ordered list of chords</td></tr>
+        </table></div>
+
+        <p>"Chord" is borrowed from music: notes struck together rather than in sequence.
+          One chord is several key events — <code>Ctrl+Alt+Right</code> is <b>one</b> chord and
+          <b>six</b> events:</p>
+        <pre><code>ctrl↓  alt↓  right↓  right↑  alt↑  ctrl↑</code></pre>
+
+        <h3>Chords nest like brackets</h3>
+        <p>Release in the reverse order you pressed. <code>Ctrl( Alt( Right ) )</code>. Compare
+          a correct macro with a broken one from the live deck config: [V]</p>
+        <pre><code>Copy                ctrl↓  c↓      c↑  ctrl↑     correct
+Duplicate Keyframe  ctrl↓  d↓   ctrl↑     d↑     crossed brackets
+Start Pause         ctrl↓  space↓  space↑         ctrl never released</code></pre>
+
+        <div class="gotcha">
+          <b>Gotcha — a leaked modifier is invisible and lasts.</b> Because injection happens
+          at kernel level, an unreleased <code>Ctrl</code> stays held <em>system-wide</em>.
+          In Krita, held Ctrl is the colour picker, so the next pen stroke samples colour
+          instead of drawing. The symptom appears minutes later, in a different app, with no
+          error — which is why it survived so long.
+        </div>
+
+        <div class="asked">
+          <b>Question asked:</b> "what is the chord and is macros.json part of our app now"<br><br>
+          A chord is the combination you <em>mean</em>; key events are what the kernel
+          <em>needs</em>. And no — <code>~/.config/LoupixDeck/macros.json</code> belongs to
+          LoupixDeck. It matters to us twice, read-only both times: as a test fixture (it holds
+          three known bugs, so it is the answer key for the validator) and later as a one-time
+          import. Never written to — LoupixDeck rewrites it on exit and would clobber us.
+        </div>
+      </div>
+
+      <div class="divider">❦ ❦ ❦</div>
+
+      <div class="chapter" id="ch4">
+        <span class="chnum">Chapter IV</span>
+        <h2>Configuration that cannot be wrong</h2>
+
+        <h3><span class="term">imperative</span> vs <span class="term">declarative</span></h3>
+        <p>An <b>imperative</b> config lists the steps: <em>press ctrl, press space, release
+          space, release ctrl.</em> A <b>declarative</b> one states the intent:
+          <em>Ctrl+Space</em> — and the program derives the steps.</p>
+        <p>LoupixDeck is imperative, and three of its five hand-built macros have ordering
+          faults. The two that are correct shipped as presets. That is not carelessness; it is
+          a data model whose most likely outcome is a bug.</p>
+
+        <div class="gotcha">
+          <b>The principle:</b> make the bug <em>unrepresentable</em> rather than asking the
+          user to be careful. If a chord is written <code>"Ctrl+Space"</code> and the app
+          expands it, you cannot leak a modifier — there is no way to write down a half-open
+          chord.
+        </div>
+
+        <h3>Bind the action, not the keystroke</h3>
+        <p>Weaker: <code>{"keys": "Ctrl+Alt+Right"}</code>. Stronger:
+          <code>{"krita": "next_frame"}</code>, resolved against Krita's own
+          <code>kritashortcutsrc</code> at runtime.</p>
+        <p>Why it is stronger: rebinding in Krita no longer breaks the deck, dead bindings
+          become <em>detectable</em>, and the keystroke cannot drift out of sync — because
+          there is only one place holding it. The deck's dead scrub knob
+          (<code>Ctrl+Shift+Right</code> vs Krita's <code>Ctrl+Alt+Right</code>) is exactly
+          that drift, and could not have happened under this model.</p>
+      </div>
+
+      <div class="divider">❦ ❦ ❦</div>
+
+      <div class="chapter" id="ch5">
+        <span class="chnum">Errata</span>
+        <h2>Mistakes, kept on purpose</h2>
+        <p>Recorded next to the correction, because the failure is usually the more useful half.</p>
+
+        <h3>1. The transaction ID that would have silently failed</h3>
+        <p><b>Claimed:</b> <code>0x1F</code>, carried over from the macOS notes.<br>
+          <b>Actually:</b> <code>0x3f</code> for the DeathAdder V2 Pro. [V] confirmed at four
+          separate sites in <code>razermouse_driver.c</code>.</p>
+        <p><b>Why it mattered:</b> <code>0x1F</code> is genuinely correct — for the BlackWidow
+          Elite, a keyboard not attached to this machine. A clean derivation from a correct-
+          but-irrelevant fact produces silent no-ops that look exactly like a wiring fault.</p>
+
+        <h3>2. "Removing OpenRazer is painful"</h3>
+        <p><b>Claimed:</b> painful, in a table of removal steps.<br>
+          <b>Actually:</b> one <code>apt remove</code>, four packages, no cascade. The PPA stays
+          configured and it is also in Pop's own universe repo. [V] confirmed with
+          <code>apt-get -s</code>.</p>
+        <p><b>The real cost is timing, not difficulty</b> — while the direct-hidraw code is
+          being validated, OpenRazer's sysfs is free ground truth. Removing it early throws
+          away the answer key.</p>
+
+        <h3>3. The mitigation that does not work here</h3>
+        <p>Standard advice for OpenRGB is "don't load <code>i2c-dev</code>/<code>i2c-piix4</code>."
+          [V] On this machine <code>i2c-dev</code> is <b>compiled into the kernel</b> and
+          <code>i2c_piix4</code> is already loaded, with three live SMBus adapters. Withholding
+          modules protects nothing; only OpenRGB's own setting does.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const MILESTONES = [
+  { id:"m1", track:"FOUNDATION", title:"Inventory & protocol notes", state:"done",
+    started:"2026-10-20", finished:"2026-10-20",
+    note:"Six devices confirmed reachable. Transaction ID corrected 0x1F→0x3f. udev rule written. Deck audited." },
+  { id:"m2", track:"FOUNDATION", title:"Skeleton app & service", state:"current",
+    started:"2026-10-20", finished:null,
+    note:"Discovery by vid/pid, not node path. find_hidraw is the open exercise." },
+  { id:"m3", track:"DEVICES", title:"Lighting for all devices", state:"locked", note:"Needs the OpenRGB decision." },
+  { id:"m4", track:"DEVICES", title:"DeathAdder DPI, polling, battery", state:"locked",
+    note:"Protocol already confirmed from source — class 0x04/0x00/0x07." },
+  { id:"m5", track:"DEVICES", title:"Profiles, applied on connect & wake", state:"locked", note:"" },
+  { id:"m6", track:"SPELLS", title:"Stream Controller module", state:"locked",
+    note:"Per-app pages is the feature LoupixDeck structurally cannot do on Wayland." },
+  { id:"m7", track:"SPELLS", title:"Spells — macros & G-Shift", state:"locked",
+    note:"Premise needs rework: the G915 TKL has no G-keys." },
+  { id:"m8", track:"POLISH", title:"Sound controls (PipeWire)", state:"locked", note:"" },
+  { id:"m9", track:"POLISH", title:"Frieren theme", state:"locked", note:"Art from assets/ only." },
+];
+
+const NOW = `<b>Milestone 2 — the skeleton.</b> Milestone 1 closed 2026-10-20: every device
+confirmed reachable, protocol notes written, and the existing Stream Controller config audited
+(one knob of three and four touch buttons of six are dead in Krita, plus a macro that leaks a
+held Ctrl system-wide). Open exercise: <code>find_hidraw()</code> in
+<code>frieren/devices.py</code>.`;
+
+document.getElementById("now-text").innerHTML = NOW;
+
+const host = document.getElementById("milestones");
+let track = null;
+for (const m of MILESTONES) {
+  if (m.track !== track) {
+    track = m.track;
+    const h = document.createElement("div");
+    h.className = "track";
+    h.textContent = track;
+    host.appendChild(h);
+  }
+  const row = document.createElement("div");
+  row.className = "ms";
+  row.dataset.state = m.state;
+  row.innerHTML = `<span class="dot"></span><div><span class="t">${m.title}</span>` +
+    (m.note ? `<span class="n">${m.note}</span>` : "") + `</div>`;
+  host.appendChild(row);
+}
+
+document.querySelectorAll(".tabbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabbtn,.tabpanel").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+  });
+});
+</script>
+</body>
+</html>
